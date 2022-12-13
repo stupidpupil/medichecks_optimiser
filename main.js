@@ -73,8 +73,7 @@ html_for_suggested_tests = function(suggested_test_handles){
   var total_cost = products.filter(prod => (suggested_test_handles.indexOf(prod.product_handle) >= 0)).map(prod => parseInt(prod.price_pence, 10)).reduce((a,b) => a+b, 0)
 
 
-   return(`
-   <table class="suggested_tests">
+   return(`<table class="suggested_tests">
       <thead>
         <tr>
           <th>Test</th>
@@ -83,8 +82,8 @@ html_for_suggested_tests = function(suggested_test_handles){
         </tr>
       </thead>
 
-      <tbody>` +
-      suggested_test_handles.map(h => html_for_product_handle(h))
+      <tbody>` + 
+        suggested_test_handles.map(h => html_for_product_handle(h)).join("\n")
       + "<tr class='total-row'><td>Total</td><td></td><td>"+ format_price_pence(total_cost) + "</td></tr>" +
       `
       </tbody>
