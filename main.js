@@ -152,7 +152,7 @@ $(function() {
   });
 
 
-  Papa.parse("products.csv", 
+  Papa.parse("/medichecks_scraper/products.csv", 
     {download: true, header: true, 
     complete: function(ret){
       products = ret.data
