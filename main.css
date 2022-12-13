@@ -1,0 +1,60 @@
+
+
+#biomarkers-label{
+  display: block;
+  font-weight: bold;
+  text-align: center;
+  padding: 0.2em;
+}
+
+#biomarkers-select{
+  width:40em;
+  height:12em;
+  display: block;
+}
+
+.select2-selection__choice__display{
+  padding: 0.5em !important
+}
+
+#inputs, #outputs{
+  float: left;
+}
+
+#outputs{
+  margin-left: 1em;
+}
+
+.suggested_tests{
+  border-collapse: collapse;
+}
+
+.suggested_tests thead tr th:nth-child(1){
+  min-width: 20em;
+}
+
+.suggested_tests thead tr th:nth-child(2){
+  min-width: 5em;
+}
+
+.suggested_tests thead tr th:nth-child(3){
+  min-width: 4.5em;
+}
+
+.suggested_tests th, .suggested_tests td{
+  padding: 0.3em 0.3em;
+  text-align: right;
+}
+
+.not_venous_only{
+  color: #aaa;
+}
+
+.suggested_tests .total-row{
+  font-style: italic;
+  border-top: 1px #aaa solid;
+}
+
+html{
+  font-family: sans-serif;
+}
