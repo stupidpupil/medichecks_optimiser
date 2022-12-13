@@ -27,6 +27,11 @@
 
 .suggested_tests{
   border-collapse: collapse;
+  margin-bottom: 1.5em;
+}
+
+.suggested_tests td a{
+  text-decoration: none;
 }
 
 .suggested_tests thead tr th:nth-child(1){

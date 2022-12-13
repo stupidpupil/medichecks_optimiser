@@ -106,18 +106,39 @@ resolve = function(){
 
   $("#outputs").empty()
 
+  if(!result.feasible){
+     $("#outputs").append("<p>Something didn't work properly, sorry.</p>")
+    return;
+  }
+
   var suggested_test_handles = Object.keys(result).filter(k => ["feasible", "result", "bounded", "isIntegral"].indexOf(k) < 0)
   $("#outputs").append(html_for_suggested_tests(suggested_test_handles))
 
 
   var model2 = model;
   suggested_test_handles.forEach(h => delete model2.variables[h])
-  console.log(model2)
 
   var result2 = solver.Solve(model2)
-  console.log(result2)
+
+  if(!result2.feasible){
+    return;
+  }
   
   suggested_test_handles = Object.keys(result2).filter(k => ["feasible", "result", "bounded", "isIntegral"].indexOf(k) < 0)
+
+  $("#outputs").append(html_for_suggested_tests(suggested_test_handles))
+
+
+  var model3 = model2;
+  suggested_test_handles.forEach(h => delete model3.variables[h])
+
+  var result3 = solver.Solve(model3)
+
+  if(!result3.feasible){
+    return;
+  }
+  
+  suggested_test_handles = Object.keys(result3).filter(k => ["feasible", "result", "bounded", "isIntegral"].indexOf(k) < 0)
 
   $("#outputs").append(html_for_suggested_tests(suggested_test_handles))
 
