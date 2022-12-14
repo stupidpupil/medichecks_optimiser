@@ -179,7 +179,7 @@ $(function() {
     complete: function(ret){
       products = ret.data
 
-      biomarkers = Object.keys(products[0]).filter(k => ["product_handle", "price_pence", "venous_only"].indexOf(k) < 0)
+      biomarkers = Object.keys(products[0]).filter(k => ["product_handle", "title", "price_pence", "venous_only"].indexOf(k) < 0)
       biomarkers.forEach(b => $("#biomarkers-select").append("<option value='"+b+"'>"+b+"</option>"))
       s2 = $("#biomarkers-select").select2()
 
