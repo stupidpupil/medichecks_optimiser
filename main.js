@@ -1,6 +1,8 @@
 var products;
 var biomarkers;
 
+var venous_cost_pence = 30*100;
+
 
 lp_variables_for_biomarkers = function(chosen_biomarkers){
   var filtered_prods = products.filter(function(prod){
@@ -11,7 +13,7 @@ lp_variables_for_biomarkers = function(chosen_biomarkers){
 
   filtered_prods.forEach(function(prod,i){
     var new_var = {
-      effective_price_pence: parseInt(prod.price_pence, 10) + (prod.venous_only == "1" ? 3000 : 0)
+      effective_price_pence: parseInt(prod.price_pence, 10) + (prod.venous_only == "1" ? venous_cost_pence : 0)
     }
 
     new_var.imagined_cost = new_var.effective_price_pence + 200 + (prod.venous_only == "1" ? 1000 : 0)
@@ -101,36 +103,40 @@ html_for_product_handle = function(product_handle){
 
   var url = "https://medichecks.com/products/" + product_handle
 
-  var venous = product.venous_only == 1 ? "<span class='venous_only'>Yes</span>" : "<span class='not_venous_only'>No</span>"
+  var ret = "<tr><td><a target='_blank' href='" + url + "'>" + product.title + "</a></td><td>" + format_price_pence(product.price_pence) + "</td></tr>"
 
-  var ret = "<tr><td><a target='_blank' href='" + url + "'>" + product.title + "</a></td><td>" + venous + "</td><td>" + format_price_pence(product.price_pence) + "</td></tr>"
+  if(product.venous_only == "1"){
+    ret = ret + "<tr class='venous collection'><td>+ venous collection</td><td>" + format_price_pence(venous_cost_pence) + "</td></tr>"
+  }
 
   return(ret)
 }
 
 html_for_result = function(result){
 
-  var total_cost = products.filter(prod => (result.suggested_test_handles.indexOf(prod.product_handle) >= 0)).map(prod => parseInt(prod.price_pence, 10)).reduce((a,b) => a+b, 0)
+  var suggested_products = products.filter(prod => (result.suggested_test_handles.indexOf(prod.product_handle) >= 0))
 
+  var total_cost = suggested_products.map(prod => parseInt(prod.price_pence, 10)).reduce((a,b) => a+b, 0)
+
+  total_cost = total_cost + suggested_products.map(prod => prod.venous_only == "1" ? venous_cost_pence : 0).reduce((a,b) => a+b, 0)
 
    return(`<div class="result"><table class="suggested_tests">
       <thead>
         <tr>
           <th>Test</th>
-          <th>Venous?</th>
           <th>Cost</th>
         </tr>
       </thead>
 
       <tbody>` + 
         result.suggested_test_handles.map(h => html_for_product_handle(h)).join("\n")
-      + "<tr class='total-row'><td>Total</td><td></td><td>"+ format_price_pence(total_cost) + "</td></tr>" +
+      + "<tr class='total-row'><td>Total</td><td>"+ format_price_pence(total_cost) + "</td></tr>" +
       `
       </tbody>
 
     </table>` +
     (result.additional_biomarkers.length ? `<p class='additional-biomarkers'>Also has: ` + html_spans_for_biomarker_handles(result.additional_biomarkers) + "</p>" : "") + 
-    (result.missing_biomarkers.length ? `<p class='missing-biomarkers'>Doesn't have: ` + html_spans_for_biomarker_handles(result.missing_biomarkers) + "</p>" : "") + 
+    (result.missing_biomarkers.length ? `<p class='missing-biomarkers'><em>Doesn't</em> have: ` + html_spans_for_biomarker_handles(result.missing_biomarkers) + "</p>" : "") + 
     "</div>")
 }
 

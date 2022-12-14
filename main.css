@@ -19,17 +19,17 @@
 
 #inputs, #outputs{
   float: left;
-   margin-left: 2em;
+  margin: 0.5em 1em;
 }
 
 .result .additional-biomarkers, .result .missing-biomarkers{
-  font-size: 0.8rem;
+  font-size: 0.8em;
+  margin: 0.5em;
 }
 
 @media only screen and (min-width: 80em) {
   #outputs{
     width: calc(100vw - 40em);
-    max-width: 50em;
   }
 }
 
@@ -37,7 +37,7 @@
   padding: 0.5em;
   margin: 0.5em;
   color: #333;
-  font-size: 0.8rem;
+  font-size: 0.8em;
 }
 
 .biomarker{
@@ -54,6 +54,7 @@
   margin: 0.5em;
   border-radius: 0.2em;
   border: 1px solid #bbb;
+  max-width: 45em;
 }
 
 .suggested_tests{
@@ -66,11 +67,7 @@
 }
 
 .suggested_tests thead tr th:nth-child(1){
-  min-width: 20em;
-}
-
-.suggested_tests thead tr th:nth-child(2){
-  min-width: 5em;
+  min-width: 15em;
 }
 
 .suggested_tests thead tr th:nth-child(3){
