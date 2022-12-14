@@ -1,4 +1,5 @@
 var products;
+var biomarkers;
 
 
 lp_variables_for_biomarkers = function(biomarkers){
@@ -68,12 +69,12 @@ html_for_product_handle = function(product_handle){
   return(ret)
 }
 
-html_for_suggested_tests = function(suggested_test_handles){
+html_for_result = function(result){
 
-  var total_cost = products.filter(prod => (suggested_test_handles.indexOf(prod.product_handle) >= 0)).map(prod => parseInt(prod.price_pence, 10)).reduce((a,b) => a+b, 0)
+  var total_cost = products.filter(prod => (result.suggested_test_handles.indexOf(prod.product_handle) >= 0)).map(prod => parseInt(prod.price_pence, 10)).reduce((a,b) => a+b, 0)
 
 
-   return(`<table class="suggested_tests">
+   return(`<div class="result"><table class="suggested_tests">
       <thead>
         <tr>
           <th>Test</th>
@@ -83,64 +84,76 @@ html_for_suggested_tests = function(suggested_test_handles){
       </thead>
 
       <tbody>` + 
-        suggested_test_handles.map(h => html_for_product_handle(h)).join("\n")
+        result.suggested_test_handles.map(h => html_for_product_handle(h)).join("\n")
       + "<tr class='total-row'><td>Total</td><td></td><td>"+ format_price_pence(total_cost) + "</td></tr>" +
       `
       </tbody>
 
-    </table>`)
+    </table>` +
+    (result.additional_biomarkers.length ? `<p class='additional-biomarkers'>Also has: ` + result.additional_biomarkers.map(b => "<span>"+b+"</span>").join(" ") + "</p>" : "") + 
+    (result.missing_biomarkers.length ? `<p class='missing-biomarkers'>Doesn't have: ` + result.missing_biomarkers.map(b => "<span>"+b+"</span>").join(" ") + "</p>" : "") + 
+    "</div>")
 }
 
 
 resolve = function(){
-  var biomarkers = $("#biomarkers-select").val().sort()
+  var chosen_biomarkers = $("#biomarkers-select").val().sort()
 
   var query_params = new URLSearchParams(window.location.search);
-  query_params.set("biomarkers", biomarkers.join(","))
+  query_params.set("biomarkers", chosen_biomarkers.join(","))
   history.replaceState(null, null, "?"+query_params.toString());
-
-  var model = lp_model_for_biomarkers(biomarkers)
-
-  var result = solver.Solve(model)
 
   $("#outputs").empty()
 
-  if(!result.feasible){
-     $("#outputs").append("<p>Something didn't work properly, sorry.</p>")
+  var model = lp_model_for_biomarkers(chosen_biomarkers)
+  var result
+
+  results = []
+
+  for (var i = 4 - 1; i >= 0; i--) {
+    
+    result = solver.Solve(model)
+
+    if (!result.feasible) {
+      break
+    }
+
+    result.suggested_test_handles = Object.keys(result).filter(k => ["feasible", "result", "bounded", "isIntegral"].indexOf(k) < 0)
+    result.suggested_test_handles.forEach(h => delete model.variables[h])
+
+    results.push(result)
+  }
+
+  if(results.length == 0){
+    $("#outputs").append("<p>Something went wrong!</p>")
     return;
   }
 
-  var suggested_test_handles = Object.keys(result).filter(k => ["feasible", "result", "bounded", "isIntegral"].indexOf(k) < 0)
-  $("#outputs").append(html_for_suggested_tests(suggested_test_handles))
+  biomarkers_for_results = results.map( 
+    r => products.
+      filter(p => r.suggested_test_handles.indexOf(p.product_handle) >= 0).
+      map(p => biomarkers.filter(b => p[b] == 1)).
+      reduce((a,b) => a.concat(b), [] )
+    ).map(bs => [...new Set(bs)].sort())
 
 
-  var model2 = model;
-  suggested_test_handles.forEach(h => delete model2.variables[h])
-
-  var result2 = solver.Solve(model2)
-
-  if(!result2.feasible){
-    return;
-  }
-  
-  suggested_test_handles = Object.keys(result2).filter(k => ["feasible", "result", "bounded", "isIntegral"].indexOf(k) < 0)
-
-  $("#outputs").append(html_for_suggested_tests(suggested_test_handles))
+  var biomarker_counts = biomarkers_for_results.flat().reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
+  common_biomarkers = [...biomarker_counts].filter(bc => bc[1] >= Math.ceil(results.length * 2/3)).map(bc => bc[0])
 
 
-  var model3 = model2;
-  suggested_test_handles.forEach(h => delete model3.variables[h])
+  results.forEach(function(e,i){
+    e.additional_biomarkers = biomarkers_for_results[i].filter( b => common_biomarkers.indexOf(b) < 0)
+    e.missing_biomarkers = common_biomarkers.filter( b => biomarkers_for_results[i].indexOf(b) < 0)
+  })
 
-  var result3 = solver.Solve(model3)
+  console.log(results)
 
-  if(!result3.feasible){
-    return;
-  }
-  
-  suggested_test_handles = Object.keys(result3).filter(k => ["feasible", "result", "bounded", "isIntegral"].indexOf(k) < 0)
+  $("#outputs").append("<p id='common-biomarkers'>Most options for the required biomarkers also include: " +  
+    common_biomarkers.filter(b => chosen_biomarkers.indexOf(b) < 0).map(b => "<span>" + b + "</span>").join(" ") + "</p>")
 
-  $("#outputs").append(html_for_suggested_tests(suggested_test_handles))
-
+  results.forEach(r => 
+    $("#outputs").append(html_for_result(r))
+  )
 
 
 }
@@ -152,12 +165,12 @@ $(function() {
   });
 
 
-  Papa.parse("/medichecks_scraper/products.csv", 
+  Papa.parse("https://stupidpupil.github.io/medichecks_scraper/products.csv", 
     {download: true, header: true, 
     complete: function(ret){
       products = ret.data
 
-      var biomarkers = Object.keys(products[0]).filter(k => ["product_handle", "price_pence", "venous_only"].indexOf(k) < 0)
+      biomarkers = Object.keys(products[0]).filter(k => ["product_handle", "price_pence", "venous_only"].indexOf(k) < 0)
       biomarkers.forEach(b => $("#biomarkers-select").append("<option value='"+b+"'>"+b+"</option>"))
       s2 = $("#biomarkers-select").select2()
 

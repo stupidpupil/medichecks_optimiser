@@ -19,15 +19,39 @@
 
 #inputs, #outputs{
   float: left;
+   margin-left: 2em;
 }
 
-#outputs{
-  margin-left: 1em;
+.result .additional-biomarkers, .result .missing-biomarkers{
+  font-size: 0.8rem;
+}
+
+@media only screen and (min-width: 80em) {
+  #outputs{
+    width: calc(100vw - 40em);
+    max-width: 50em;
+  }
+}
+
+#common-biomarkers{
+  padding: 0.5em;
+  margin: 0.5em;
+  color: #333;
+  font-size: 0.8rem;
+}
+
+.result{
+  background-color: #ededed;
+  padding: 0.5em;
+  margin: 0.5em;
+  border-radius: 0.2em;
+  
+  
 }
 
 .suggested_tests{
   border-collapse: collapse;
-  margin-bottom: 1.5em;
+  width: 100%;
 }
 
 .suggested_tests td a{
