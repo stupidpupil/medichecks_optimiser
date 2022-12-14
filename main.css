@@ -40,8 +40,16 @@
   font-size: 0.8rem;
 }
 
+.biomarker{
+  display: inline-block;
+  padding: 0.2em 0.5em;
+  margin-bottom: 0.15em;
+  border-radius: 0.2em;
+  background-color: #ddd;
+}
+
 .result{
-  background-color: #ededed;
+  background-color: #fafafa;
   padding: 0.5em;
   margin: 0.5em;
   border-radius: 0.2em;
