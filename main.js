@@ -143,7 +143,7 @@ resolve = function(){
 
 
   var biomarker_counts = biomarkers_for_results.flat().reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
-  common_biomarkers = [...biomarker_counts].filter(bc => bc[1] >= Math.ceil(results.length * 2/3)).map(bc => bc[0])
+  var common_biomarkers = [...biomarker_counts].filter(bc => bc[1] >= Math.ceil(results.length * 2/3)).map(bc => bc[0])
 
 
   results.forEach(function(e,i){
@@ -153,8 +153,12 @@ resolve = function(){
 
   console.log(results)
 
-  $("#outputs").append("<p id='common-biomarkers'>Most options for the required biomarkers also include: " +  
-    common_biomarkers.filter(b => chosen_biomarkers.indexOf(b) < 0).map(b => "<span>" + b + "</span>").join(" ") + "</p>")
+  var common_biomarkers_minus_chosen = common_biomarkers.filter(b => chosen_biomarkers.indexOf(b) < 0)
+
+  if(common_biomarkers_minus_chosen.length > 0){
+    $("#outputs").append("<p id='common-biomarkers'>Most options for the required biomarkers also include: " +  
+      common_biomarkers_minus_chosen.map(b => "<span>" + b + "</span>").join(" ") + "</p>")
+  }
 
   results.forEach(r => 
     $("#outputs").append(html_for_result(r))
@@ -180,6 +184,7 @@ $(function() {
       s2 = $("#biomarkers-select").select2()
 
       s2.on("change", resolve)
+      resolve()
 
       if(params.biomarkers){
         var param_biomarkers = params.biomarkers.split(",").filter(k => biomarkers.indexOf(k) >= 0)
