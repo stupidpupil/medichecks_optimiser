@@ -105,6 +105,11 @@ resolve = function(){
 
   $("#outputs").empty()
 
+  if(chosen_biomarkers.length == 0){
+    $("#outputs").append("<p>Add some required biomarkers to see suggested test sets.</p>")
+    return;
+  }
+
   var model = lp_model_for_biomarkers(chosen_biomarkers)
   var result
 
