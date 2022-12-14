@@ -45,8 +45,7 @@
   padding: 0.5em;
   margin: 0.5em;
   border-radius: 0.2em;
-  
-  
+  border: 1px solid #bbb;
 }
 
 .suggested_tests{
