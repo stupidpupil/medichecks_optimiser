@@ -32,7 +32,7 @@
   grid-template-areas:
       "inputs"
       "outputs";
-    gap: 1em;
+    gap: 0.5em;
 }
 
 @media (min-width: calc(3*30em + 5em)) {
@@ -45,9 +45,8 @@
   }
 }
 
-
-#inputs, #outputs{
-  margin: 0.5em 1em;
+#inputs{
+  grid-area: inputs;
 }
 
 #outputs{
