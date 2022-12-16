@@ -49,6 +49,17 @@
     gap: 0.5em;
 }
 
+
+@media (min-width: 50em) {
+  #main{
+    grid-template-columns: repeat(1, 50em);
+    grid-template-rows: auto;
+    gap: 1em;
+  }
+}
+
+
+
 @media (min-width: calc(3*30em + 5em)) {
   #main{
     grid-template-columns: repeat(3, 30em);
