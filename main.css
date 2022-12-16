@@ -1,5 +1,19 @@
 
 
+#loading{
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: white;
+  z-index: 100;
+}
+
+.loaded #loading{
+  display: none;
+}
+
 #biomarkers-label{
   display: block;
   font-weight: bold;

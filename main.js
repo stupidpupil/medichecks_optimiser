@@ -224,6 +224,17 @@ $(function() {
       get: (searchParams, prop) => searchParams.get(prop),
   });
 
+  check_if_all_loaded = function(){
+    if(!biomarkers || !products){
+      return
+    }
+
+    resolve()
+
+    $("html").addClass("loaded")
+
+  }
+
   Papa.parse("https://stupidpupil.github.io/medichecks_scraper/biomarkers.csv", 
     {download: true, header: true, 
       complete: function(ret){
@@ -233,7 +244,6 @@ $(function() {
         s2 = $("#biomarkers-select").select2()
 
         s2.on("change", resolve)
-        resolve()
 
         if(params.biomarkers){
           var param_biomarkers = params.biomarkers.split(",").filter(k => biomarkers.map(b => b.biomarker_handle).indexOf(k) >= 0)
@@ -241,6 +251,7 @@ $(function() {
           s2.trigger("change")
         }
 
+        check_if_all_loaded()
       }
     })
 
@@ -250,8 +261,7 @@ $(function() {
     complete: function(ret){
       products = ret.data
 
-      resolve()
-
+      check_if_all_loaded()
     }
     })
 
