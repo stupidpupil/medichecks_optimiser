@@ -183,7 +183,7 @@ resolve = function(){
   results = []
 
   var suggested_test_handles_for_result = function(result){
-    return(Object.keys(result).filter(k => ["feasible", "result", "bounded", "isIntegral"].indexOf(k) < 0).sort())
+    return(Object.keys(result).filter(k => !(["feasible", "result", "bounded", "isIntegral"].includes(k))).sort())
   }
 
   var find_matching_result = function(r2){
@@ -283,7 +283,7 @@ resolve = function(){
 
   biomarkers_for_results = results.map( 
     r => products.
-      filter(p => r.suggested_test_handles.indexOf(p.product_handle) >= 0).
+      filter(p => r.suggested_test_handles.includes(p.product_handle)).
       map(p => biomarkers.map(b => b.biomarker_handle).filter(b => p[b] == 1)).
       reduce((a,b) => a.concat(b), [] )
     ).map(bs => [...new Set(bs)].sort())
@@ -294,11 +294,11 @@ resolve = function(){
 
 
   results.forEach(function(e,i){
-    e.additional_biomarkers = biomarkers_for_results[i].filter( b => common_biomarkers.indexOf(b) < 0)
-    e.missing_biomarkers = common_biomarkers.filter( b => biomarkers_for_results[i].indexOf(b) < 0)
+    e.additional_biomarkers = biomarkers_for_results[i].filter( b => !(common_biomarkers.includes(b)))
+    e.missing_biomarkers = common_biomarkers.filter( b => !(biomarkers_for_results[i].includes(b)))
   })
 
-  var common_biomarkers_minus_chosen = common_biomarkers.filter(b => chosen_biomarkers.indexOf(b) < 0)
+  var common_biomarkers_minus_chosen = common_biomarkers.filter(b => !(chosen_biomarkers.includes(b)))
 
   if(common_biomarkers_minus_chosen.length > 0){
     $("#outputs").append("<p id='common-biomarkers'>Most options for the required biomarkers also include: " +  
@@ -340,7 +340,7 @@ $(function() {
         s2.on("change", resolve)
 
         if(params.biomarkers){
-          var param_biomarkers = params.biomarkers.split(",").filter(k => biomarkers.map(b => b.biomarker_handle).indexOf(k) >= 0)
+          var param_biomarkers = params.biomarkers.split(",").filter(k => biomarkers.map(b => b.biomarker_handle).includes(k))
           s2.val(param_biomarkers)
           s2.trigger("change")
         }
