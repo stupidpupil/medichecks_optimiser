@@ -3,7 +3,7 @@
   <head>
 
     <meta charset="UTF-8">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Papa Parse -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js" 
@@ -12,7 +12,8 @@
 
 
     <!-- LP Solver -->
-    <script src="https://unpkg.com/javascript-lp-solver/prod/solver.js"></script>
+    <!-- Unlicense Licence -->
+    <script src="lib/solver.js"></script>
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" 
@@ -30,15 +31,16 @@
   </head>
   <body>
 
-    <div id="inputs">
-      <label id="biomarkers-label" for="biomarkers-select">Required biomarkers</label>
-      <select name="biomarkers" id="biomarkers-select" multiple>
-      </select>
+    <div id="main">
+      <div id="inputs">
+        <label id="biomarkers-label" for="biomarkers-select">Required biomarkers</label>
+        <select name="biomarkers" id="biomarkers-select" multiple>
+        </select>
 
+      </div>
+
+      <div id="outputs">
+      </div>
     </div>
-
-    <div id="outputs">
-    </div>
-
   </body>
 </html>
