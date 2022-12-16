@@ -4,7 +4,20 @@ var biomarkers;
 var venous_cost_pence = 30*100;
 
 
-lp_variables_for_biomarkers = function(chosen_biomarkers){
+lp_variables_for_biomarkers = function(chosen_biomarkers, options){
+
+  defaults = {
+    every_test_penalty_pence: 0,
+    venous_penalty_pence: 0 /* This is *in addition* to venous_cost_pence */
+  }
+
+  if(options){
+    options = {...defaults, ...options}
+  }else{
+    options = defaults
+  }
+
+
   var filtered_prods = products.filter(function(prod){
    return(chosen_biomarkers.map(b => prod[b]).reduce((a,b) => a+parseInt(b,10), 0) > 0)
   })
@@ -16,7 +29,8 @@ lp_variables_for_biomarkers = function(chosen_biomarkers){
       effective_price_pence: parseInt(prod.price_pence, 10) + (prod.venous_only == "1" ? venous_cost_pence : 0)
     }
 
-    new_var.imagined_cost = new_var.effective_price_pence + 200 + (prod.venous_only == "1" ? 1000 : 0)
+    new_var.imagined_cost = new_var.effective_price_pence + options.every_test_penalty_pence
+    new_var.imagined_cost = new_var.imagined_cost + (prod.venous_only == "1" ? options.venous_penalty_pence : 0)
 
     chosen_biomarkers.forEach(b => new_var[b] = parseInt(prod[b], 10))
 
@@ -35,12 +49,12 @@ lp_constraints_for_biomarkers = function(chosen_biomarkers){
   return(constraints)
 }
 
-lp_model_for_biomarkers = function(chosen_biomarkers){
+lp_model_for_biomarkers = function(chosen_biomarkers, options){
   var model = {
     optimize: "imagined_cost",
     opType: "min",
     constraints: lp_constraints_for_biomarkers(chosen_biomarkers),
-    variables: lp_variables_for_biomarkers(chosen_biomarkers)
+    variables: lp_variables_for_biomarkers(chosen_biomarkers, options)
   };
 
   model.ints = {}
@@ -168,19 +182,99 @@ resolve = function(){
 
   results = []
 
-  for (var i = 4 - 1; i >= 0; i--) {
-    
-    result = solver.Solve(model)
+  var suggested_test_handles_for_result = function(result){
+    return(Object.keys(result).filter(k => ["feasible", "result", "bounded", "isIntegral"].indexOf(k) < 0).sort())
+  }
 
-    if (!result.feasible) {
-      break
-    }
+  var find_matching_result = function(r2){
+    var ret = results.find(r1 => 
+      r2.suggested_test_handles.every(a => r1.suggested_test_handles.includes(a)) && 
+      r1.suggested_test_handles.every(a => r2.suggested_test_handles.includes(a)))
+    return(ret)
+  }
 
-    result.suggested_test_handles = Object.keys(result).filter(k => ["feasible", "result", "bounded", "isIntegral"].indexOf(k) < 0)
-    result.suggested_test_handles.forEach(h => delete model.variables[h])
+  /*
+    First attempt, we just try to find the cheapest
+  */
 
+  result = solver.Solve(model)
+  result.suggested_test_handles = suggested_test_handles_for_result(result)
+  results.push(result)
+
+  /* 
+    We try to find an alternative with a completely different set of tests
+  */
+
+  result.suggested_test_handles.forEach(h => delete model.variables[h])
+  
+  result = solver.Solve(model)
+  result.suggested_test_handles = suggested_test_handles_for_result(result)
+
+  if(!find_matching_result(result)){
     results.push(result)
   }
+
+  /* We try to avoid multiple tests and venous tests */
+
+  model = lp_model_for_biomarkers(chosen_biomarkers, {every_test_penalty_pence: 500, venous_penalty_pence: 1500})
+  result = solver.Solve(model)
+  result.suggested_test_handles = suggested_test_handles_for_result(result)
+
+  if(!find_matching_result(result)){
+    results.push(result)
+  }
+
+  /* We *really* try to avoid multiple tests and venous tests */
+
+  model = lp_model_for_biomarkers(chosen_biomarkers, {every_test_penalty_pence: 2000, venous_penalty_pence: 6000})
+  result = solver.Solve(model)
+  result.suggested_test_handles = suggested_test_handles_for_result(result)
+
+  if(!find_matching_result(result)){
+    results.push(result)
+  }
+
+
+  /* We try to add some biomarkers for common undiagnosed conditions */
+
+  var chosen_plus_suggested_biomarkers = [...chosen_biomarkers, 'ggt', 'creatinine', 'ldl-cholesterol']
+
+  model = lp_model_for_biomarkers(chosen_plus_suggested_biomarkers)
+  result = solver.Solve(model)
+  result.suggested_test_handles = suggested_test_handles_for_result(result)
+
+  if(!find_matching_result(result)){
+    results.push(result)
+  }
+
+
+
+  /* If either sex hormone is required, suggest adding SHBG */
+
+  if(['testosterone', 'oestradiol'].some(e => chosen_biomarkers.includes(e))){
+    chosen_plus_suggested_biomarkers.push('shbg')
+    model = lp_model_for_biomarkers(chosen_plus_suggested_biomarkers)
+    result = solver.Solve(model)
+    result.suggested_test_handles = suggested_test_handles_for_result(result)
+
+    if(!find_matching_result(result)){
+      results.push(result)
+    }
+  }
+
+  /* If oestradiol is required, suggest adding Vitamin D */
+
+  if(['oestradiol'].some(e => chosen_biomarkers.includes(e))){
+    chosen_plus_suggested_biomarkers.push('vitamin-d')
+    model = lp_model_for_biomarkers(chosen_plus_suggested_biomarkers)
+    result = solver.Solve(model)
+    result.suggested_test_handles = suggested_test_handles_for_result(result)
+
+    if(!find_matching_result(result)){
+      results.push(result)
+    }
+  }
+
 
   if(results.length == 0){
     $("#outputs").append("<p>Something went wrong!</p>")
