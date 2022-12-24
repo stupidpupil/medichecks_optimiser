@@ -8,6 +8,16 @@
   width: 100vw;
   background-color: white;
   z-index: 100;
+  text-align: center;
+  padding-top: 2em;
+}
+
+#loading *{
+  display: none;
+}
+
+#loading.still-loading *{
+  display: initial;
 }
 
 .loaded #loading{
@@ -50,7 +60,7 @@
 }
 
 
-@media (min-width: 50em) {
+@media (min-width: 50 em) {
   #main{
     grid-template-columns: repeat(1, 50em);
     grid-template-rows: auto;
