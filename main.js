@@ -318,7 +318,11 @@ window.addEventListener("load", function() {
       get: (searchParams, prop) => searchParams.get(prop),
   });
 
-  check_if_all_loaded = function(){
+  var error_loading = function(){
+    $("html").addClass("major-error")
+  }
+
+  var check_if_all_loaded = function(){
     if(!biomarkers || !products){
       return
     }
@@ -346,7 +350,8 @@ window.addEventListener("load", function() {
         }
 
         check_if_all_loaded()
-      }
+      },
+      error: error_loading
     })
 
 
@@ -356,7 +361,8 @@ window.addEventListener("load", function() {
       products = ret.data
 
       check_if_all_loaded()
-    }
+    },
+    error: error_loading
     })
 
 })

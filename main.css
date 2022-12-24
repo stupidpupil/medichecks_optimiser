@@ -1,17 +1,4 @@
 
-
-#loading{
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  height: 100vh;
-  width: 100vw;
-  background-color: white;
-  z-index: 100;
-  text-align: center;
-  padding-top: 2em;
-}
-
 #loading *{
   display: none;
 }
@@ -20,34 +7,21 @@
   display: initial;
 }
 
-.loaded #loading{
-  display: none;
-}
-
-#biomarkers-label{
-  display: block;
+.major-error #major-error{
+  display: block !important;
+  color: red;
   font-weight: bold;
-  text-align: center;
-  padding: 0.2em;
 }
 
-#biomarkers-select{
-  width:100%;
-  display: block;
+.loaded #loading{
+  display: none !important;
 }
 
-.select2-container {
-  width: 100% !important;
+.loaded #main{
+  display: grid !important;  
 }
-
-.select2-selection__choice__display{
-  padding: 0.5em !important
-}
-
-
 
 #main{
-  display: grid;
   justify-content: center;
   align-content: center;
 
@@ -93,6 +67,7 @@
 #outputs{
   grid-area: outputs;
 }
+
 
 .result .additional-biomarkers, .result .missing-biomarkers{
   font-size: 0.8em;
@@ -153,6 +128,24 @@
   border-top: 1px #aaa solid;
 }
 
-html{
-  font-family: sans-serif;
+
+
+#biomarkers-label{
+  display: block;
+  font-weight: bold;
+  text-align: center;
+  padding: 0.2em;
+}
+
+#biomarkers-select{
+  width:100%;
+  display: block;
+}
+
+.select2-container {
+  width: 100% !important;
+}
+
+.select2-selection__choice__display{
+  padding: 0.5em !important
 }

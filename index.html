@@ -16,7 +16,7 @@
     <script defer src="lib/solver.js"></script>
 
     <!-- Select2 -->
-    <link  rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"/>
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"/>
     <script defer src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <link rel="stylesheet" href="main.css?221224T1645" />
@@ -25,10 +25,11 @@
     <title>Medichecks Optimiser</title>
 
   </head>
-  <body>
+  <body style="font-family: sans-serif;">
 
-    <div id="loading">
+    <div id="loading" style="text-align: center; padding-top: 2em; position: fixed; top: 0; bottom: 0; height: 100vh; width: 100vw; z-index: 100;   background-color: white;">
       <div>Loading...</div>
+      <div id="major-error" style="display:none;">Something went wrong!</div>
     </div>
 
     <script type="text/javascript">
@@ -43,7 +44,7 @@
     </script>
 
 
-    <div id="main">
+    <div id="main" style="display:none;">
       <div id="inputs">
         <label id="biomarkers-label" for="biomarkers-select">Required biomarkers</label>
         <select name="biomarkers" id="biomarkers-select" multiple>
