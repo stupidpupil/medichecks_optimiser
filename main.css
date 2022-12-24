@@ -60,7 +60,7 @@
 }
 
 
-@media (min-width: 50 em) {
+@media (min-width: 50em) {
   #main{
     grid-template-columns: repeat(1, 50em);
     grid-template-rows: auto;
@@ -70,9 +70,9 @@
 
 
 
-@media (min-width: calc(3*30em + 5em)) {
+@media (min-width: 80em) {
   #main{
-    grid-template-columns: repeat(3, 30em);
+    grid-template-columns: repeat(3, 25em);
     grid-template-rows: auto;
     grid-template-areas:
       "inputs outputs outputs";
