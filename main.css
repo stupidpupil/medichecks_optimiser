@@ -55,7 +55,8 @@
   grid-template-rows: auto;
   grid-template-areas:
       "inputs"
-      "outputs";
+      "outputs"
+      "info";
     gap: 0.5em;
 }
 
@@ -73,15 +74,20 @@
 @media (min-width: 80em) {
   #main{
     grid-template-columns: repeat(3, 25em);
-    grid-template-rows: auto;
+    grid-template-rows: auto minmax(3em, 1fr);
     grid-template-areas:
-      "inputs outputs outputs";
+      "inputs outputs outputs"
+      "info outputs outputs";
     gap: 1em;
   }
 }
 
 #inputs{
   grid-area: inputs;
+}
+
+#info{
+  grid-area: info;
 }
 
 #outputs{

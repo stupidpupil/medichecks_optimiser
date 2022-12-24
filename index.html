@@ -19,8 +19,8 @@
     <link  rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"/>
     <script defer src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    <link rel="stylesheet" href="main.css?221224T1435" />
-    <script defer src="main.js?221224T1630"></script>
+    <link rel="stylesheet" href="main.css?221224T1645" />
+    <script defer src="main.js?221224T1645"></script>
 
     <title>Medichecks Optimiser</title>
 
@@ -34,7 +34,7 @@
     <script type="text/javascript">
       var products;
       var biomarkers;
-      
+
       setTimeout(function () {
         if(!biomarkers || !products){
           document.getElementById("loading").classList.add('still-loading')
@@ -49,6 +49,11 @@
         <select name="biomarkers" id="biomarkers-select" multiple>
         </select>
 
+      </div>
+
+      <div id="info">
+        <p>This website suggests sets of tests from Medichecks, based on a user-specified set of required biomarkers.</p>
+        <p>Unaffliated with Medichecks. No endorsement of Medichecks or particular tests for any purpose is implied.</p>
       </div>
 
       <div id="outputs">
