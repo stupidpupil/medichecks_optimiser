@@ -106,12 +106,14 @@
   text-decoration: none;
 }
 
-.suggested_tests thead tr th:nth-child(1){
-  min-width: 15em;
+.suggested_tests th{
+  font-size: 0.8em;
+  color: #555;
+  font-weight: bold;
 }
 
-.suggested_tests thead tr th:nth-child(3){
-  min-width: 4.5em;
+.suggested_tests thead tr th:nth-child(2){
+  width: 12ch;
 }
 
 .suggested_tests th, .suggested_tests td{
