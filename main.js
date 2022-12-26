@@ -210,7 +210,7 @@ resolve = function(){
   result = solver.Solve(model)
   result.suggested_test_handles = suggested_test_handles_for_result(result)
 
-  if(!find_matching_result(result)){
+  if(result.feasible && !find_matching_result(result)){
     results.push(result)
   }
 
@@ -220,7 +220,7 @@ resolve = function(){
   result = solver.Solve(model)
   result.suggested_test_handles = suggested_test_handles_for_result(result)
 
-  if(!find_matching_result(result)){
+  if(result.feasible && !find_matching_result(result)){
     results.push(result)
   }
 
@@ -230,7 +230,7 @@ resolve = function(){
   result = solver.Solve(model)
   result.suggested_test_handles = suggested_test_handles_for_result(result)
 
-  if(!find_matching_result(result)){
+  if(result.feasible && !find_matching_result(result)){
     results.push(result)
   }
 
@@ -243,7 +243,7 @@ resolve = function(){
   result = solver.Solve(model)
   result.suggested_test_handles = suggested_test_handles_for_result(result)
 
-  if(!find_matching_result(result)){
+  if(result.feasible && !find_matching_result(result)){
     results.push(result)
   }
 
@@ -270,7 +270,7 @@ resolve = function(){
     result = solver.Solve(model)
     result.suggested_test_handles = suggested_test_handles_for_result(result)
 
-    if(!find_matching_result(result)){
+    if(result.feasible && !find_matching_result(result)){
       results.push(result)
     }
   }
