@@ -236,6 +236,16 @@ resolve = function(){
     results.push(result)
   }
 
+  /* Some people might actually prefer a venous blood draw, particularly if turnaround is quicker*/
+
+  model = lp_model_for_biomarkers(chosen_biomarkers, {every_test_penalty_pence: 5000, venous_penalty_pence: -3500, turnaround_day_penalty_pence: 500})
+  result = solver.Solve(model)
+  result.suggested_test_handles = suggested_test_handles_for_result(result)
+
+  if(result.feasible && !find_matching_result(result)){
+    results.push(result)
+  }
+
 
   /* We try to add some biomarkers for common undiagnosed conditions */
 
@@ -248,7 +258,6 @@ resolve = function(){
   if(result.feasible && !find_matching_result(result)){
     results.push(result)
   }
-
 
 
   /* If either sex hormone is required, suggest adding SHBG */
