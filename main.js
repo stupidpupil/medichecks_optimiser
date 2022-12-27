@@ -119,7 +119,8 @@ html_for_product_handle = function(product_handle){
 
   var url = "https://medichecks.com/products/" + product_handle
 
-  var ret = "<tr><td><a target='_blank' href='" + url + "'>" + product.title + "</a></td><td>" + format_price_pence(product.price_pence) + "</td></tr>"
+  var ret = "<tr><td><a target='_blank' rel='noreferrer nofollow noopener external' referrerpolicy='no-referrer' " + 
+    "href='" + url + "'>" + product.title + "</a></td><td>" + format_price_pence(product.price_pence) + "</td></tr>"
 
   if(product.venous_only == "1"){
     ret = ret + "<tr class='venous collection'><td>+ venous collection</td><td>" + format_price_pence(venous_cost_pence) + "</td></tr>"
