@@ -8,7 +8,8 @@ lp_variables_for_biomarkers = function(chosen_biomarkers, options){
 
   defaults = {
     every_test_penalty_pence: 0,
-    venous_penalty_pence: 0 /* This is *in addition* to venous_cost_pence */
+    venous_penalty_pence: 0, /* This is *in addition* to venous_cost_pence */
+    turnaround_day_penalty_pence: 0 /* Note that this accumulates for multiple tests, so doesn't work quite as you'd hope */
   }
 
   if(options){
@@ -31,6 +32,7 @@ lp_variables_for_biomarkers = function(chosen_biomarkers, options){
 
     new_var.imagined_cost = new_var.effective_price_pence + options.every_test_penalty_pence
     new_var.imagined_cost = new_var.imagined_cost + (prod.venous_only == "1" ? options.venous_penalty_pence : 0)
+    new_var.imagined_cost = new_var.imagined_cost + (parseInt(prod.turnaround_days, 10) * options.turnaround_day_penalty_pence)
 
     chosen_biomarkers.forEach(b => new_var[b] = parseInt(prod[b], 10))
 
