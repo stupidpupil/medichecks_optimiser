@@ -345,7 +345,7 @@ window.addEventListener("load", function() {
 
   }
 
-  Papa.parse("https://stupidpupil.github.io/medichecks_scraper/biomarkers.csv", 
+  Papa.parse("https://stupidpupil.github.io/medichecks_scraper/biomarkers.csv?" + (new Date).toISOString().substring(0,10), 
     {download: true, header: true, 
       complete: function(ret){
         biomarkers = ret.data
@@ -367,7 +367,7 @@ window.addEventListener("load", function() {
     })
 
 
-  Papa.parse("https://stupidpupil.github.io/medichecks_scraper/products.csv", 
+  Papa.parse("https://stupidpupil.github.io/medichecks_scraper/products.csv?" + (new Date).toISOString().substring(0,10), 
     {download: true, header: true, 
     complete: function(ret){
       products = ret.data
