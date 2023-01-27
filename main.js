@@ -9,7 +9,8 @@ lp_variables_for_biomarkers = function(chosen_biomarkers, options){
   defaults = {
     every_test_penalty_pence: 0,
     venous_penalty_pence: 0, /* This is *in addition* to venous_cost_pence */
-    turnaround_day_penalty_pence: 0 /* Note that this accumulates for multiple tests, so doesn't work quite as you'd hope */
+    turnaround_day_penalty_pence: 0, /* Note that this accumulates for multiple tests, so doesn't work quite as you'd hope */
+    require_venous: false
   }
 
   if(options){
@@ -23,15 +24,21 @@ lp_variables_for_biomarkers = function(chosen_biomarkers, options){
    return(chosen_biomarkers.map(b => prod[b]).reduce((a,b) => a+parseInt(b,10), 0) > 0)
   })
 
+  if(options.require_venous == true){
+    filtered_prods = filtered_prods.filter(function(prod){
+      return(prod.venous_available == 1)
+    })
+  }
+
   var variables = {}
 
   filtered_prods.forEach(function(prod,i){
     var new_var = {
-      effective_price_pence: parseInt(prod.price_pence, 10) + (prod.venous_only == "1" ? venous_cost_pence : 0)
+      effective_price_pence: parseInt(prod.price_pence, 10) + ((prod.venous_only == "1" || options.require_venous) ? venous_cost_pence : 0)
     }
 
     new_var.imagined_cost = new_var.effective_price_pence + options.every_test_penalty_pence
-    new_var.imagined_cost = new_var.imagined_cost + (prod.venous_only == "1" ? options.venous_penalty_pence : 0)
+    new_var.imagined_cost = new_var.imagined_cost + ((prod.venous_only == "1" || options.require_venous) ? options.venous_penalty_pence : 0)
     new_var.imagined_cost = new_var.imagined_cost + (parseInt(prod.turnaround_days, 10) * options.turnaround_day_penalty_pence)
 
     chosen_biomarkers.forEach(b => new_var[b] = parseInt(prod[b], 10))
@@ -113,7 +120,7 @@ html_spans_for_biomarker_handles = function(biomarker_handles){
   return(rel_biomarkers.map(html_span_for_biomarker).join(" "))
 }
 
-html_for_product_handle = function(product_handle){
+html_for_product_handle = function(product_handle, require_venous){
 
   var product = products.find(prod => prod.product_handle == product_handle)
 
@@ -122,20 +129,20 @@ html_for_product_handle = function(product_handle){
   var ret = "<tr><td><a target='_blank' rel='noreferrer nofollow noopener external' referrerpolicy='no-referrer' " + 
     "href='" + url + "'>" + product.title + "</a></td><td>" + format_price_pence(product.price_pence) + "</td></tr>"
 
-  if(product.venous_only == "1"){
+  if(product.venous_only == "1" || require_venous){
     ret = ret + "<tr class='venous collection'><td>+ venous collection</td><td>" + format_price_pence(venous_cost_pence) + "</td></tr>"
   }
 
   return(ret)
 }
 
-html_for_result = function(result){
+html_for_result = function(result, require_venous){
 
   var suggested_products = products.filter(prod => (result.suggested_test_handles.indexOf(prod.product_handle) >= 0))
 
   var total_cost = suggested_products.map(prod => parseInt(prod.price_pence, 10)).reduce((a,b) => a+b, 0)
 
-  total_cost = total_cost + suggested_products.map(prod => prod.venous_only == "1" ? venous_cost_pence : 0).reduce((a,b) => a+b, 0)
+  total_cost = total_cost + suggested_products.map(prod => (prod.venous_only == "1" || require_venous) ? venous_cost_pence : 0).reduce((a,b) => a+b, 0)
 
    return(`<div class="result"><table class="suggested_tests">
       <thead>
@@ -146,7 +153,7 @@ html_for_result = function(result){
       </thead>
 
       <tbody>` + 
-        result.suggested_test_handles.map(h => html_for_product_handle(h)).join("\n")
+        result.suggested_test_handles.map(h => html_for_product_handle(h, require_venous)).join("\n")
       + "<tr class='total-row'><td>Total</td><td>"+ format_price_pence(total_cost) + "</td></tr>" +
       `
       </tbody>
@@ -160,9 +167,11 @@ html_for_result = function(result){
 
 resolve = function(){
   var chosen_biomarkers = $("#biomarkers-select").val().sort()
+  var require_venous = $("#require-venous-checkbox").is(":checked")
 
   var query_params = new URLSearchParams(window.location.search);
   query_params.set("biomarkers", chosen_biomarkers.join(","))
+  query_params.set("require_venous", require_venous)
   history.replaceState(null, null, "?"+query_params.toString());
 
   $("#outputs").empty()
@@ -180,7 +189,6 @@ resolve = function(){
     return;
   }
 
-  var model = lp_model_for_biomarkers(chosen_biomarkers)
   var result
 
   results = []
@@ -200,6 +208,7 @@ resolve = function(){
     First attempt, we just try to find the cheapest
   */
 
+  var model = lp_model_for_biomarkers(chosen_biomarkers, {require_venous: require_venous})
   result = solver.Solve(model)
   result.suggested_test_handles = suggested_test_handles_for_result(result)
   results.push(result)
@@ -219,7 +228,7 @@ resolve = function(){
 
   /* We try to avoid multiple tests and venous tests */
 
-  model = lp_model_for_biomarkers(chosen_biomarkers, {every_test_penalty_pence: 500, venous_penalty_pence: 1500})
+  model = lp_model_for_biomarkers(chosen_biomarkers, {require_venous: require_venous, every_test_penalty_pence: 500, venous_penalty_pence: 1500})
   result = solver.Solve(model)
   result.suggested_test_handles = suggested_test_handles_for_result(result)
 
@@ -229,7 +238,7 @@ resolve = function(){
 
   /* We *really* try to avoid multiple tests and venous tests */
 
-  model = lp_model_for_biomarkers(chosen_biomarkers, {every_test_penalty_pence: 2000, venous_penalty_pence: 6000})
+  model = lp_model_for_biomarkers(chosen_biomarkers, {require_venous: require_venous, every_test_penalty_pence: 2000, venous_penalty_pence: 6000})
   result = solver.Solve(model)
   result.suggested_test_handles = suggested_test_handles_for_result(result)
 
@@ -239,7 +248,7 @@ resolve = function(){
 
   /* Some people might actually prefer a venous blood draw, particularly if turnaround is quicker*/
 
-  model = lp_model_for_biomarkers(chosen_biomarkers, {every_test_penalty_pence: 5000, venous_penalty_pence: -3500, turnaround_day_penalty_pence: 500})
+  model = lp_model_for_biomarkers(chosen_biomarkers, {require_venous: require_venous, every_test_penalty_pence: 5000, venous_penalty_pence: -3500, turnaround_day_penalty_pence: 500})
   result = solver.Solve(model)
   result.suggested_test_handles = suggested_test_handles_for_result(result)
 
@@ -252,7 +261,7 @@ resolve = function(){
 
   var chosen_plus_suggested_biomarkers = [...chosen_biomarkers, 'ggt', 'creatinine', 'ldl-cholesterol']
 
-  model = lp_model_for_biomarkers(chosen_plus_suggested_biomarkers)
+  model = lp_model_for_biomarkers(chosen_plus_suggested_biomarkers, {require_venous: require_venous})
   result = solver.Solve(model)
   result.suggested_test_handles = suggested_test_handles_for_result(result)
 
@@ -265,7 +274,7 @@ resolve = function(){
 
   if(['testosterone', 'oestradiol'].some(e => chosen_biomarkers.includes(e))){
     chosen_plus_suggested_biomarkers.push('shbg')
-    model = lp_model_for_biomarkers(chosen_plus_suggested_biomarkers)
+    model = lp_model_for_biomarkers(chosen_plus_suggested_biomarkers, {require_venous: require_venous})
     result = solver.Solve(model)
     result.suggested_test_handles = suggested_test_handles_for_result(result)
 
@@ -278,7 +287,7 @@ resolve = function(){
 
   if(['oestradiol'].some(e => chosen_biomarkers.includes(e))){
     chosen_plus_suggested_biomarkers.push('vitamin-d')
-    model = lp_model_for_biomarkers(chosen_plus_suggested_biomarkers)
+    model = lp_model_for_biomarkers(chosen_plus_suggested_biomarkers, {require_venous: require_venous})
     result = solver.Solve(model)
     result.suggested_test_handles = suggested_test_handles_for_result(result)
 
@@ -318,7 +327,7 @@ resolve = function(){
   }
 
   results.forEach(r => 
-    $("#outputs").append(html_for_result(r))
+    $("#outputs").append(html_for_result(r, require_venous))
   )
 
 
@@ -361,16 +370,21 @@ window.addEventListener("load", function() {
           s2.trigger("change")
         }
 
+
         check_if_all_loaded()
       },
       error: error_loading
     })
 
 
-  Papa.parse("https://stupidpupil.github.io/medichecks_scraper/products.csv?" + (new Date).toISOString().substring(0,10), 
+  Papa.parse("https://stupidpupil.github.io/medichecks_scraper/products.csv?" + (new Date).toISOString().substring(0,10) + "v2", 
     {download: true, header: true, 
     complete: function(ret){
       products = ret.data
+
+      var require_venous = (params.require_venous == "true")
+      $("#require-venous-checkbox").prop("checked", require_venous)
+      $("#require-venous-checkbox").on("change", resolve)
 
       check_if_all_loaded()
     },
